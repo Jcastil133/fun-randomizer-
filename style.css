@@ -1,356 +1,122 @@
-/* script.js - Fun Randomizer + Match Game Mode
-   Drop into fun-randomizer/script.js
-*/
-(function(){
-  // ---- helpers ----
-  const $ = s => document.querySelector(s);
-  const id = s => document.getElementById(s);
+:root{
+  --magenta: #E20074;
+  --bg:#fbfbfd;
+  --card:#ffffff;
+  --muted:#6b6b6b;
+  --shadow: 0 10px 30px rgba(15,15,15,0.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg,#fff,var(--bg));
+  color:#111;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  align-items:center;
+}
 
-  // elements
-  const namesEl = id('names');
-  const teamsCountEl = id('teamsCount');
-  const teamSizeEl = id('teamSize');
-  const shuffleBtn = id('shuffleBtn');
-  const clearBtn = id('clearBtn');
-  const randomNameBtn = id('randomNameBtn');
-  const allowUneven = id('allowUneven');
-  const results = id('results');
+/* top header */
+.topbar{
+  width:100%;
+  max-width:1200px;
+  padding:20px 20px 6px;
+  margin-top:10px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.magenta-dot{
+  width:36px;height:36px;border-radius:8px;background:var(--magenta);
+  box-shadow:0 6px 20px rgba(226,0,116,0.12)
+}
+.brand h1{margin:0;font-size:20px}
+.subtitle{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-  // manual teams
-  const manualTeamName = id('manualTeamName');
-  const addManualTeam = id('addManualTeam');
-  const manualTeamsList = id('manualTeamsList');
+/* tabs */
+.tabs{
+  width:100%;
+  max-width:1200px;
+  display:flex;
+  gap:8px;
+  padding:8px 20px;
+}
+.tab-btn{
+  background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;
+}
+.tab-btn.active{background:linear-gradient(180deg,var(--magenta),#c20062);color:#fff;border-color:transparent;box-shadow:var(--shadow)}
 
-  // match game
-  const tilesContainer = id('tiles');
-  const revealRandom = id('revealRandom');
-  const resetTiles = id('resetTiles');
-  const teamSelect = id('teamSelect');
-  const saleSize = id('saleSize');
-  const recordSale = id('recordSale');
-  const removeTileBtn = id('removeTileBtn');
-  const puzzleAnswerEl = id('puzzleAnswer');
-  const guessInput = id('guessInput');
-  const submitGuess = id('submitGuess');
-  const gameLog = id('gameLog');
+/* main area */
+.main-wrap{width:100%;max-width:1200px;padding:18px;display:block}
 
-  // confetti
-  const confettiCanvas = id('confetti');
-  const ctx = confettiCanvas.getContext && confettiCanvas.getContext('2d');
+.card{
+  background:var(--card);
+  border-radius:12px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(15,15,15,0.03);
+}
 
-  function resizeCanvas(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+/* large pane gives more vertical space */
+.large{min-height:420px}
 
-  // simple shuffle
-  function shuffleArr(a){
-    for(let i=a.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
-    }
-    return a;
-  }
+/* panes */
+.pane{display:none}
+.pane.active{display:block}
 
-  // demo
-  const demo = ['Ava','Ben','Carmen','Derek','Ethan','Faye','Gabe','Hannah','Ivy','Jason','Kira','Liam'];
-  randomNameBtn.addEventListener('click', ()=> namesEl.value = demo.join('\n'));
+/* two-column layout inside randomizer */
+.pane-columns{display:flex;gap:20px}
+.left{flex:0 0 420px}
+.right{flex:1;min-height:360px;display:flex;align-items:flex-start;justify-content:flex-start}
 
-  // ---- TEAM logic ----
-  let teams = []; // {id,name,members:[],sales:[],requiredSims:10,abilityCount:0,lastRemoved:false,isCaptain:false}
-  function resetTeams(){
-    teams = [];
-    renderTeamSelect();
-    results.innerHTML = '';
-    manualTeamsList.innerText = '';
-  }
-  resetTeams();
+/* match grid layout */
+.match-grid{display:flex;gap:20px;align-items:flex-start}
+.match-left{flex:0 0 420px}
+.match-right{flex:1}
 
-  addManualTeam.addEventListener('click', ()=>{
-    const name = manualTeamName.value.trim();
-    if(!name) return alert('Enter a team name');
-    teams.push({id:cryptoRandomId(), name, members:[], sales:[], requiredSims:10, abilityCount:0, lastRemoved:false, isCaptain:false});
-    manualTeamName.value = '';
-    renderManualList();
-    renderTeamSelect();
-    renderTeamsCards();
-  });
+/* inputs */
+label{display:block;margin-bottom:8px;color:#333;font-weight:600}
+textarea, input[type=text], input[type=number], select, input{
+  width:100%;padding:12px;border-radius:8px;border:1px solid #e6e6e9;font-size:14px;background:#fff;
+}
+textarea{resize:vertical}
 
-  function cryptoRandomId(){ return Math.random().toString(36).slice(2,9); }
+/* rows and buttons */
+.row{display:flex;gap:12px;margin-top:12px;align-items:center}
+.row > div{flex:1}
+.row.buttons{margin-top:16px}
+.hint{display:block;margin-top:10px;color:var(--muted);font-size:13px}
 
-  function renderManualList(){
-    manualTeamsList.innerHTML = '';
-    teams.forEach(t=>{
-      const d = document.createElement('div');
-      d.style.marginBottom='6px';
-      d.innerHTML = `<strong>${t.name}</strong> — required:${t.requiredSims} • sales:${t.sales.length}`;
-      manualTeamsList.appendChild(d);
-    });
-  }
+.btn{padding:10px 14px;border-radius:8px;border:0;background:#f1f1f4;cursor:pointer;font-weight:700}
+.btn.primary{background:linear-gradient(180deg,var(--magenta),#c20062);color:white;box-shadow:0 8px 22px rgba(226,0,116,0.18)}
+.btn.alt{background:linear-gradient(180deg,#fff,#f8f8fb);border:1px solid rgba(0,0,0,0.04)}
+.btn:active{transform:translateY(1px)}
 
-  // create teams from names randomizer
-  function createTeams(){
-    const raw = namesEl.value.split('\n').map(s => s.trim()).filter(Boolean);
-    if(raw.length === 0){
-      alert('Add at least one name.');
-      return;
-    }
-    const teamsCount = parseInt(teamsCountEl.value,10) || 4;
-    const teamSize = parseInt(teamSizeEl.value,10) || 2;
-    const names = shuffleArr(raw.slice());
+/* results / team cards */
+.results{display:grid;gap:12px}
+.team{display:flex;gap:12px;align-items:center;padding:14px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbf8ff);border:1px solid rgba(0,0,0,0.04)}
+.badge{width:72px;height:72px;border-radius:12px;background:var(--magenta);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
+.members{display:flex;gap:8px;flex-wrap:wrap}
+.member{padding:8px 10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.04);font-weight:600}
 
-    // clear previous teams
-    teams = Array.from({length:teamsCount}, (_,i)=>({id:cryptoRandomId(), name:`Team ${i+1}`, members:[], sales:[], requiredSims:10, abilityCount:0, lastRemoved:false, isCaptain:false}));
+/* tiles (larger) */
+.tiles-large{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.tile{width:140px;height:108px;border-radius:10px;background:linear-gradient(180deg,#fafafa,#fff);display:flex;align-items:center;justify-content:center;font-weight:800;border:1px solid rgba(0,0,0,0.04);cursor:pointer;user-select:none;transition:transform .25s,box-shadow .2s}
+.tile.revealed{background:linear-gradient(180deg,#fff7fb,#ffeef8);box-shadow:0 18px 40px rgba(226,0,116,0.08)}
+.tile:active{transform:translateY(2px)}
 
-    if(!allowUneven.checked){
-      // fill to honor teamSize first then round-robin
-      let idx = 0;
-      for(let i=0;i<names.length;i++){
-        teams[idx].members.push(names[i]);
-        idx = (idx+1) % teamsCount;
-      }
-    } else {
-      for(let i=0;i<names.length;i++){
-        teams[i % teamsCount].members.push(names[i]);
-      }
-    }
+/* small helpers */
+.muted{color:var(--muted)}
+.small-text{font-size:13px}
+.footer{width:100%;max-width:1200px;padding:18px;color:var(--muted);font-size:13px;text-align:center;margin-top:18px}
 
-    renderTeamsCards();
-    renderTeamSelect();
-    renderManualList();
-  }
-  shuffleBtn.addEventListener('click', createTeams);
-  clearBtn.addEventListener('click', ()=>{ namesEl.value=''; results.innerHTML=''; teams=[]; renderTeamSelect(); manualTeamsList.innerHTML=''; });
-
-  function renderTeamsCards(){
-    results.innerHTML = '';
-    teams.forEach((t,i)=>{
-      const el = document.createElement('div');
-      el.className = 'team';
-      el.innerHTML = `<div class="badge">T${i+1}</div>
-        <div>
-          <div style="font-weight:800;margin-bottom:6px">${t.name} ${t.isCaptain? '• Captain' : ''}</div>
-          <div class="members">${t.members.map(m=>`<div class="member">${m}</div>`).join('')}</div>
-          <div style="margin-top:8px;font-size:13px;color:var(--muted)">Req: ${t.requiredSims} • Abilities: ${t.abilityCount} • Sales recorded: ${t.sales.length}</div>
-        </div>`;
-      results.appendChild(el);
-    });
-  }
-
-  function renderTeamSelect(){
-    teamSelect.innerHTML = '';
-    if(teams.length === 0){
-      const opt = document.createElement('option'); opt.value=''; opt.innerText='— no teams —'; teamSelect.appendChild(opt); return;
-    }
-    teams.forEach(t=>{
-      const opt = document.createElement('option'); opt.value = t.id; opt.innerText = `${t.name} (Req:${t.requiredSims} Ab:${t.abilityCount})`;
-      teamSelect.appendChild(opt);
-    });
-  }
-
-  // ---- SALES & ability rules ----
-  // record a single sale for selected team
-  recordSale.addEventListener('click', ()=>{
-    const t = getSelectedTeam();
-    if(!t) return alert('Select a team first');
-    const s = parseInt(saleSize.value,10);
-    if(isNaN(s) || s <= 0) return alert('Enter a sale size (number)');
-    // rule: single sale >= requiredSims grants one ability to remove a tile
-    t.sales.push({size:s, time:Date.now()});
-    if(s >= t.requiredSims){
-      t.abilityCount += 1; // one tile removal grant
-      log(`${t.name} recorded a qualifying sale of ${s} sims → +1 tile removal ability`);
-    } else {
-      log(`${t.name} recorded a sale of ${s} sims (does not qualify for immediate removal - single sale must be >= ${t.requiredSims})`);
-    }
-    saleSize.value = '';
-    renderTeamsCards();
-    renderTeamSelect();
-  });
-
-  function getSelectedTeam(){
-    const idv = teamSelect.value;
-    return teams.find(t=>t.id === idv);
-  }
-
-  // ---- TILES & removal ----
-  const TILE_COUNT = 9;
-  let tileState = []; // {revealed:false, content:"..."}
-  let puzzleAnswer = '';
-
-  function buildTiles(){
-    tilesContainer.innerHTML = '';
-    tileState = Array.from({length:TILE_COUNT}, (_,i)=>({revealed:false, content:`PUZZLE PART ${i+1}`}));
-    tileState.forEach((t,i)=>{
-      const el = document.createElement('div');
-      el.className = 'tile';
-      el.dataset.index = i;
-      el.innerHTML = `<div>Tile ${i+1}</div>`;
-      el.addEventListener('click', ()=> handleTileClick(i));
-      tilesContainer.appendChild(el);
-    });
-    log('Tiles reset.');
-  }
-
-  function handleTileClick(i){
-    // don't allow clicking tiles directly unless revealed by removal or random reveal
-    if(tileState[i].revealed) return;
-    alert('Tiles must be revealed by team action (Remove Tile or Reveal Random). Use Remove Tile to consume an ability.');
-  }
-
-  removeTileBtn.addEventListener('click', ()=>{
-    const t = getSelectedTeam();
-    if(!t) return alert('Select a team first');
-    // team must have abilityCount > 0
-    if(t.abilityCount <= 0){
-      alert(`${t.name} has no removal abilities. You need at least one qualifying single sale >= ${t.requiredSims}.`);
-      return;
-    }
-    // pick an unrevealed tile (user cannot choose tile index here — random)
-    const unrevealed = tileState.map((s,i)=> s.revealed ? null : i).filter(n=> n !== null);
-    if(unrevealed.length === 0){
-      alert('All tiles already revealed.');
-      return;
-    }
-    const sel = unrevealed[Math.floor(Math.random()*unrevealed.length)];
-    revealTile(sel, t, true);
-  });
-
-  function revealTile(i, teamObj, consumedByTeam){
-    tileState[i].revealed = true;
-    const el = tilesContainer.querySelector(`.tile[data-index="${i}"]`);
-    if(!el) return;
-    el.classList.add('revealed');
-    el.innerHTML = `<div style="text-align:center"><div style="font-size:12px;color:#6b6b6b">Revealed</div><div style="font-weight:800;margin-top:6px">${tileState[i].content}</div></div>`;
-    // consume the team's ability if removal was by team
-    if(consumedByTeam){
-      teamObj.abilityCount = Math.max(0, teamObj.abilityCount - 1);
-      teamObj.lastRemoved = true; // mark that they removed a tile this round
-      log(`${teamObj.name} removed a tile (consumed ability). They may now guess the puzzle.`);
-      renderTeamsCards();
-      renderTeamSelect();
-      shootConfetti(18);
-    } else {
-      log(`A tile was revealed (random).`);
-    }
-  }
-
-  // Reveal random (not consuming a team's ability)
-  revealRandom.addEventListener('click', ()=>{
-    const unrevealed = tileState.map((s,i)=> s.revealed ? null : i).filter(n=> n !== null);
-    if(unrevealed.length === 0) return;
-    const sel = unrevealed[Math.floor(Math.random()*unrevealed.length)];
-    revealTile(sel, null, false);
-  });
-
-  resetTiles.addEventListener('click', ()=>{
-    buildTiles();
-    // reset per-team lastRemoved flags
-    teams.forEach(t=>{ t.lastRemoved = false; });
-    renderTeamsCards();
-    renderTeamSelect();
-  });
-
-  // ---- GUESS logic ----
-  submitGuess.addEventListener('click', ()=>{
-    const t = getSelectedTeam();
-    if(!t) return alert('Select a team first');
-    if(!t.lastRemoved){
-      alert('A team must remove a tile this round before they are allowed to guess the final puzzle.');
-      return;
-    }
-    const guess = guessInput.value.trim();
-    if(!guess) return alert('Enter a guess.');
-    // puzzleAnswer may be set by the user in the small admin field
-    puzzleAnswer = (puzzleAnswerEl.value || '').trim();
-    if(!puzzleAnswer){
-      // if not provided, make an example check: we consider puzzle to be "MAGENTA" for demo
-      puzzleAnswer = 'MAGENTA';
-    }
-    if(guess.toLowerCase() === puzzleAnswer.toLowerCase()){
-      log(`${t.name} guessed correctly! Winner: ${t.name}`);
-      t.isCaptain = true;
-      shootConfetti(120);
-      // show final reveal of remaining tiles
-      tileState.forEach((tile,i)=> { if(!tile.revealed) revealTile(i, null, false); });
-      renderTeamsCards();
-      renderTeamSelect();
-      alert(`${t.name} guessed correctly — they win and will be captains for the next game!`);
-    } else {
-      // incorrect guess: doubles requiredSims for that team
-      t.requiredSims = t.requiredSims * 2;
-      t.lastRemoved = false; // must remove again next time
-      log(`${t.name} guessed incorrectly. Their required sims doubled to ${t.requiredSims}.`);
-      renderTeamsCards();
-      renderTeamSelect();
-      alert(`Incorrect guess. ${t.name}'s required sims doubled to ${t.requiredSims}.`);
-    }
-    guessInput.value = '';
-  });
-
-  // ---- logging ----
-  function log(msg){
-    const ts = new Date().toLocaleTimeString();
-    gameLog.innerHTML = `<div>[${ts}] ${escapeHtml(msg)}</div>` + gameLog.innerHTML;
-  }
-
-  function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  // ---- simple confetti impl ----
-  function shootConfetti(particles=40){
-    if(!ctx) return;
-    const W = confettiCanvas.width;
-    const H = confettiCanvas.height;
-    const pieces = [];
-    const colors = ['#E20074','#FF7AB6','#FFD9EE','#6b6b6b','#FFFFFF'];
-
-    for(let i=0;i<particles;i++){
-      pieces.push({
-        x: Math.random()*W,
-        y: Math.random()*H*0.2,
-        vx: (Math.random()-0.5)*6,
-        vy: 2+Math.random()*6,
-        size: 6+Math.random()*8,
-        color: colors[Math.floor(Math.random()*colors.length)],
-        rot: Math.random()*360,
-        drot: (Math.random()-0.5)*8
-      });
-    }
-
-    let t0 = performance.now();
-    let alive = true;
-    function frame(now){
-      const dt = (now - t0)/1000;
-      t0 = now;
-      ctx.clearRect(0,0,W,H);
-      pieces.forEach(p=>{
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.2; // gravity
-        p.rot += p.drot;
-        ctx.save();
-        ctx.translate(p.x,p.y);
-        ctx.rotate(p.rot * Math.PI/180);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
-        ctx.restore();
-      });
-      const remaining = pieces.filter(p=>p.y < H + 30);
-      if(remaining.length === 0) alive = false;
-      if(alive) requestAnimationFrame(frame);
-      else ctx.clearRect(0,0,W,H);
-    }
-    requestAnimationFrame(frame);
-  }
-
-  // ---- init ----
-  function init(){
-    // prefill demo names
-    if(!namesEl.value.trim()){
-      namesEl.value = 'Alex\nBailey\nCam\nDiego\nEvelyn\nFrank';
-    }
-    buildTiles();
-    renderTeamSelect();
-  }
-  init();
-
-})();
+/* responsive */
+@media (max-width:980px){
+  .pane-columns, .match-grid{flex-direction:column}
+  .left, .match-left{flex:1}
+  .right, .match-right{flex:1}
+  .tiles-large{justify-content:center}
+  .tab-btn{flex:1}
+}
