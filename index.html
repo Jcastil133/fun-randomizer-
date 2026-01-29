@@ -4,31 +4,118 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fun Randomizer & Match Game — jcastil133</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* -------- theme -------- */
+    :root{
+      --magenta:#E20074;
+      --bg:#fbfbfd;
+      --card:#ffffff;
+      --muted:#6b6b6b;
+      --shadow: 0 12px 30px rgba(15,15,15,0.06);
+      --max-w:980px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg,#fff,var(--bg));
+      color:#111;
+      -webkit-font-smoothing:antialiased;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:22px;
+    }
+
+    /* container */
+    .wrap{width:100%;max-width:var(--max-w)}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .dot{width:34px;height:34px;border-radius:8px;background:var(--magenta);box-shadow:0 10px 28px rgba(226,0,116,0.12)}
+    h1{font-size:20px;margin:0}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:6px;margin-left:46px}
+
+    /* tabs */
+    .tabs{display:flex;gap:8px;margin:8px 0 18px}
+    .tab{padding:8px 12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-weight:700;background:transparent;cursor:pointer}
+    .tab.active{background:linear-gradient(180deg,var(--magenta),#c20062);color:#fff;border-color:transparent;box-shadow:var(--shadow)}
+
+    /* pane card */
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:var(--shadow);border:1px solid rgba(15,15,15,0.03)}
+    .pane{display:none}
+    .pane.active{display:block}
+
+    /* layout columns */
+    .cols{display:flex;gap:20px;align-items:flex-start}
+    .left{flex:0 0 380px}
+    .right{flex:1;min-height:380px}
+
+    /* inputs */
+    label{display:block;font-weight:700;color:#222;margin-bottom:8px}
+    textarea,input,select{width:100%;padding:12px;border-radius:8px;border:1px solid #e6e6e9;background:#fff;font-size:14px}
+    textarea{resize:vertical;min-height:160px}
+    .row{display:flex;gap:12px;align-items:center;margin-top:12px}
+    .row > *{flex:1}
+    .btn{padding:10px 14px;border-radius:10px;border:0;background:#f1f1f4;cursor:pointer;font-weight:700}
+    .btn.primary{background:linear-gradient(180deg,var(--magenta),#c20062);color:#fff;box-shadow:0 10px 26px rgba(226,0,116,0.18)}
+    .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+    .hint{color:var(--muted);font-size:13px;margin-top:8px;display:block}
+
+    /* results and teams */
+    .results{display:grid;gap:12px}
+    .team{display:flex;gap:12px;align-items:center;padding:16px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbf8ff);border:1px solid rgba(0,0,0,0.04)}
+    .badge{width:74px;height:74px;border-radius:12px;background:var(--magenta);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px}
+    .members{display:flex;gap:10px;flex-wrap:wrap}
+    .member{padding:8px 10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.04);font-weight:700}
+
+    /* match tiles */
+    .tiles{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+    .tile{width:140px;height:108px;border-radius:10px;background:linear-gradient(180deg,#fafafa,#fff);display:flex;align-items:center;justify-content:center;font-weight:900;border:1px solid rgba(0,0,0,0.04);cursor:pointer;transition:transform .2s,box-shadow .2s}
+    .tile.revealed{background:linear-gradient(180deg,#fff7fb,#ffeef8);box-shadow:0 18px 40px rgba(226,0,116,0.08)}
+    .tile:active{transform:translateY(2px)}
+
+    /* match right info */
+    .match-right{display:flex;flex-direction:column;gap:12px}
+
+    /* game log */
+    .log{max-height:200px;overflow:auto;padding:10px;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.03);color:var(--muted)}
+
+    /* footer */
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media (max-width:980px){
+      .cols{flex-direction:column}
+      .left{flex:1}
+      .badge{width:64px;height:64px}
+      .tile{width:120px;height:92px}
+      :root{--max-w:640px}
+    }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="magenta-dot"></div>
-      <h1>Fun Randomizer & Match Game</h1>
-    </div>
-    <p class="subtitle">T-Mobile themed — teams, randomizer, and the Gallardian Match Game</p>
-  </header>
+  <div class="wrap">
+    <header>
+      <div class="dot" aria-hidden="true"></div>
+      <div>
+        <h1>Fun Randomizer & Match Game</h1>
+        <div class="subtitle">T-Mobile themed — teams, randomizer, and the Gallardian Match Game</div>
+      </div>
+    </header>
 
-  <nav class="tabs">
-    <button class="tab-btn active" data-target="pane-randomizer">Randomizer</button>
-    <button class="tab-btn" data-target="pane-matchgame">Match Game</button>
-  </nav>
+    <nav class="tabs" role="tablist" aria-label="Tools">
+      <button class="tab active" data-target="pane-random" role="tab" aria-selected="true">Randomizer</button>
+      <button class="tab" data-target="pane-match" role="tab" aria-selected="false">Match Game</button>
+    </nav>
 
-  <main class="main-wrap">
-    <!-- Randomizer Pane -->
-    <section id="pane-randomizer" class="pane active card large">
-      <div class="pane-columns">
+    <!-- RANDOMIZER PANE -->
+    <section id="pane-random" class="pane active card">
+      <div class="cols">
         <div class="left">
-          <label for="names">Enter names (one per line):</label>
-          <textarea id="names" placeholder="Alice\nBob\nCharlie\n..." rows="10"></textarea>
+          <label for="names">Enter names (one per line)</label>
+          <textarea id="names" placeholder="Alex&#10;Bailey&#10;Cam&#10;Diego&#10;Evelyn&#10;Frank"></textarea>
 
-          <div class="row">
+          <div class="row" style="margin-top:10px">
             <div>
               <label for="teamsCount">Number of teams</label>
               <input id="teamsCount" type="number" min="2" max="12" value="4" />
@@ -39,79 +126,276 @@
             </div>
           </div>
 
-          <div class="row buttons">
-            <button id="shuffleBtn" class="btn primary">Create Teams</button>
-            <button id="clearBtn" class="btn">Clear</button>
-            <button id="randomNameBtn" class="btn alt">Add Demo Names</button>
+          <div class="row" style="margin-top:14px">
+            <button id="createTeams" class="btn primary">Create Teams</button>
+            <button id="clearBtn" class="btn ghost">Clear</button>
+            <button id="demoBtn" class="btn">Add Demo Names</button>
           </div>
 
           <label class="hint"><input id="allowUneven" type="checkbox" checked /> Allow uneven teams (distribute leftover)</label>
 
-          <hr style="margin:16px 0"/>
+          <hr style="margin:14px 0" />
 
-          <h3>Manual teams</h3>
+          <label for="manualTeam">Manual teams</label>
           <div class="row">
-            <input id="manualTeamName" placeholder="Team name (eg. Team A)" />
-            <button id="addManualTeam" class="btn">Add Team</button>
+            <input id="manualTeam" placeholder="Team name (eg. Team A)" />
+            <button id="addTeam" class="btn">Add</button>
           </div>
-          <div id="manualTeamsList" class="muted small-text"></div>
+          <div id="manualList" class="hint" style="margin-top:10px">No manual teams yet.</div>
         </div>
 
         <div class="right">
-          <div id="results" class="results"></div>
+          <div id="results" class="results" aria-live="polite"></div>
         </div>
       </div>
     </section>
 
-    <!-- Match Game Pane -->
-    <section id="pane-matchgame" class="pane card large">
-      <div class="match-grid">
-        <div class="match-left">
-          <h2>Match Game</h2>
-          <p class="muted">Sales grant tile removals. Single sale ≥ required sims (default 10) grants one removal. Wrong guesses double required sims.</p>
+    <!-- MATCH GAME PANE -->
+    <section id="pane-match" class="pane card">
+      <div class="cols">
+        <div class="left">
+          <h2 style="margin-top:0">Match Game</h2>
+          <div class="hint">Sales grant tile removals. Single sale ≥ required sims (default 10) grants one removal. Wrong guesses double required sims.</div>
 
-          <label>Active puzzle answer (for testing)</label>
+          <label for="puzzleAnswer" style="margin-top:12px">Active puzzle answer (for testing)</label>
           <input id="puzzleAnswer" placeholder="SECRET WORD" />
 
           <label style="margin-top:12px">Select team</label>
           <select id="teamSelect"></select>
 
-          <div class="row" style="margin-top:10px">
-            <label style="flex:1">
-              Record a sale (single-sale size)
-              <input id="saleSize" type="number" placeholder="e.g., 10" />
-            </label>
+          <div class="row">
+            <input id="saleSize" type="number" placeholder="Record sale size (e.g., 10)" />
             <button id="recordSale" class="btn">Record Sale</button>
           </div>
 
-          <div class="row" style="margin-top:10px">
-            <button id="removeTileBtn" class="btn primary">Remove Tile (consume ability)</button>
-            <button id="revealRandom" class="btn">Reveal Random Tile</button>
-            <button id="resetTiles" class="btn">Reset Tiles</button>
+          <div class="row" style="margin-top:12px">
+            <button id="removeTile" class="btn primary">Remove Tile (use ability)</button>
+            <button id="reveal" class="btn">Reveal Random Tile</button>
+            <button id="reset" class="btn ghost">Reset Tiles</button>
           </div>
 
           <div class="row" style="margin-top:12px">
-            <input id="guessInput" placeholder="Enter puzzle guess (must remove a tile first)" />
+            <input id="guess" placeholder="Enter puzzle guess (must remove a tile first)" />
             <button id="submitGuess" class="btn">Guess</button>
           </div>
 
-          <div id="gameLog" class="muted small-text" style="margin-top:12px;max-height:160px;overflow:auto;border-radius:8px;padding:8px;background:#fff"></div>
+          <div class="log" id="log" style="margin-top:12px"></div>
         </div>
 
-        <div class="match-right">
-          <div id="tiles" class="tiles-large"></div>
-          <div id="matchInfo" style="margin-top:12px;color:var(--muted);font-size:14px"></div>
+        <div class="right match-right">
+          <div id="tiles" class="tiles" aria-live="polite"></div>
+          <div id="matchInfo" class="hint" style="margin-top:12px"></div>
         </div>
       </div>
     </section>
-  </main>
 
-  <canvas id="confetti"></canvas>
+    <footer>
+      <small>Made by jcastil133 • magenta theme</small>
+    </footer>
+  </div>
 
-  <footer class="footer">
-    <small>Made by jcastil133 • magenta theme</small>
-  </footer>
+  <canvas id="confetti" style="position:fixed;left:0;top:0;pointer-events:none;z-index:9999"></canvas>
 
-  <script src="script.js"></script>
+  <script>
+    /* Single-file JS: tabs, randomizer, match game, confetti */
+    (function(){
+      /* --- utilities --- */
+      const $ = s => document.querySelector(s);
+      const $$ = s => Array.from(document.querySelectorAll(s));
+      const id = s => document.getElementById(s);
+      function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]} return a }
+
+      /* --- tabs --- */
+      const tabs = $$('.tab');
+      tabs.forEach(t=>{
+        t.addEventListener('click', ()=>{
+          tabs.forEach(x=>x.classList.remove('active'));
+          t.classList.add('active');
+          const target = t.dataset.target;
+          $$('.pane').forEach(p=>p.classList.remove('active'));
+          const pane = id(target);
+          if(pane) pane.classList.add('active');
+        });
+      });
+
+      /* --- confetti canvas --- */
+      const confettiCanvas = id('confetti');
+      const ctx = confettiCanvas.getContext && confettiCanvas.getContext('2d');
+      function resizeCanvas(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+      window.addEventListener('resize', resizeCanvas); resizeCanvas();
+
+      function smallBurst(n=40){
+        if(!ctx) return; burst(n, 0.2, 6, 12);
+      }
+      function bigBurst(){
+        if(!ctx) return; burst(320, 0.6, 6, 22);
+      }
+      // generic burst: count, verticalSpreadScale, minSpeed, maxSpeed
+      function burst(count, vspread, minS, maxS){
+        const W = confettiCanvas.width, H = confettiCanvas.height;
+        const pieces = [];
+        const colors = ['#E20074','#FF7AB6','#FFD9EE','#6b6b6b','#FFFFFF','#FFC0E6','#FF5BA1'];
+        for(let i=0;i<count;i++){
+          const angle = Math.random()*Math.PI - Math.PI/2;
+          const speed = minS + Math.random()*(maxS-minS);
+          pieces.push({
+            x: W/2 + (Math.random()-0.5)*220,
+            y: H*0.6 + (Math.random()-0.5)*140,
+            vx: Math.cos(angle)*speed + (Math.random()-0.5)*6,
+            vy: Math.sin(angle)*speed - (4 + Math.random()*8) * vspread,
+            size: 6 + Math.random()*12,
+            color: colors[Math.floor(Math.random()*colors.length)],
+            rot: Math.random()*360,
+            drot: (Math.random()-0.5)*14
+          });
+        }
+        let t0 = performance.now();
+        function frame(now){
+          const dt = (now - t0)/1000; t0 = now;
+          ctx.clearRect(0,0,W,H);
+          for(let p of pieces){
+            p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.rot += p.drot;
+            ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6); ctx.restore();
+          }
+          const alive = pieces.filter(p=>p.y < H + 80);
+          if(alive.length>0) requestAnimationFrame(frame); else ctx.clearRect(0,0,W,H);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      /* --- Randomizer UI --- */
+      const namesEl = id('names'), teamsCount = id('teamsCount'), teamSize = id('teamSize');
+      const createBtn = id('createTeams') || id('createTeams');
+      const clearBtn = id('clearBtn'), demoBtn = id('demoBtn'), allowUneven = id('allowUneven');
+      const results = id('results'), manualTeam = id('manualTeam'), addTeam = id('addTeam'), manualList = id('manualList');
+
+      const demoNames = ['Ava','Ben','Carmen','Derek','Ethan','Faye','Gabe','Hannah','Ivy','Jason','Kira','Liam'];
+      demoBtn.addEventListener('click', ()=> namesEl.value = demoNames.join('\\n'));
+
+      // shared team store (used also by match game)
+      let teams = [];
+
+      function renderTeams(){
+        results.innerHTML = '';
+        if(teams.length===0){
+          results.innerHTML = '<div class="hint">No teams yet. Create teams or add manual teams.</div>';
+          return;
+        }
+        teams.forEach((t,i)=>{
+          const el = document.createElement('div'); el.className='team';
+          el.innerHTML = '<div class="badge">T'+(i+1)+'</div>';
+          const info = document.createElement('div');
+          info.innerHTML = '<div style="font-weight:800;margin-bottom:8px">'+escapeHtml(t.name)+(t.isCaptain? ' • Captain':'')+'</div>';
+          const members = document.createElement('div'); members.className='members';
+          if(t.members.length===0){ members.innerHTML = '<div class="hint">No members</div>'; }
+          else t.members.forEach(m=>{ const d=document.createElement('div'); d.className='member'; d.textContent = m; members.appendChild(d); });
+          const meta = document.createElement('div'); meta.style.marginTop='8px'; meta.style.color='var(--muted)'; meta.style.fontSize='13px';
+          meta.textContent = `Req: ${t.requiredSims} • Abilities: ${t.abilityCount} • Sales: ${t.sales.length}`;
+          info.appendChild(members); info.appendChild(meta);
+          el.appendChild(info);
+          results.appendChild(el);
+        });
+      }
+
+      function createTeams(){
+        const raw = namesEl.value.split('\\n').map(s=>s.trim()).filter(Boolean);
+        if(raw.length===0){ alert('Add at least one name.'); return; }
+        const count = Math.max(2, parseInt(teamsCount.value,10) || 4);
+        const names = shuffle(raw.slice());
+        teams = Array.from({length:count}, (_,i)=>({id: 't'+i, name: 'Team '+(i+1), members:[], sales:[], requiredSims:10, abilityCount:0, lastRemoved:false, isCaptain:false}));
+        if(!allowUneven.checked){
+          let idx=0;
+          for(let n of names){ teams[idx].members.push(n); idx=(idx+1)%count; }
+        } else {
+          for(let i=0;i<names.length;i++) teams[i%count].members.push(names[i]);
+        }
+        renderTeams(); renderTeamSelect();
+        smallBurst(40);
+      }
+      (id('createTeams') || id('createTeams')).addEventListener('click', createTeams);
+      clearBtn.addEventListener('click', ()=>{ namesEl.value=''; teams=[]; renderTeams(); renderTeamSelect(); manualList.textContent='No manual teams yet.'; });
+      addTeam.addEventListener('click', ()=>{
+        const n = manualTeam.value.trim(); if(!n) return alert('Enter team name'); teams.push({id:'m'+Math.random().toString(36).slice(2,8), name:n, members:[], sales:[], requiredSims:10, abilityCount:0, lastRemoved:false, isCaptain:false}); manualTeam.value=''; renderTeams(); renderTeamSelect(); renderManualList();
+      });
+
+      function renderManualList(){ manualList.textContent = teams.length? teams.map(t=>`${t.name} (Req:${t.requiredSims})`).join(' · ') : 'No manual teams yet.'; }
+
+      function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+      /* --- Match Game UI --- */
+      const tilesEl = id('tiles'), teamSelect = id('teamSelect'), saleSize = id('saleSize'), recordSale = id('recordSale');
+      const btnRemove = id('removeTile'), btnReveal = id('reveal'), btnReset = id('reset'), puzzleAnswer = id('puzzleAnswer');
+      const guessInput = id('guess'), submitGuess = id('submitGuess'), logEl = id('log'), matchInfo = id('matchInfo');
+
+      const TILE_COUNT = 9;
+      let tileState = [];
+      function buildTiles(){
+        tilesEl.innerHTML=''; tileState = Array.from({length:TILE_COUNT}, (_,i)=>({revealed:false, content:`PUZZLE ${i+1}`} ));
+        tileState.forEach((t,i)=>{
+          const el = document.createElement('div'); el.className='tile'; el.dataset.index = i; el.innerHTML = 'Tile '+(i+1);
+          el.addEventListener('click', ()=> alert('Reveal via Remove Tile or Reveal Random.'));
+          tilesEl.appendChild(el);
+        });
+        updateMatchInfo();
+        log('Tiles reset.');
+      }
+
+      function log(s){ const ts = new Date().toLocaleTimeString(); logEl.innerHTML = `<div>[${ts}] ${escapeHtml(s)}</div>` + logEl.innerHTML; }
+
+      function renderTeamSelect(){
+        teamSelect.innerHTML=''; if(teams.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='— no teams —'; teamSelect.appendChild(o); return; }
+        teams.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=`${t.name} (Req:${t.requiredSims} Ab:${t.abilityCount})`; teamSelect.appendChild(o); });
+      }
+
+      function getSelectedTeam(){ const idv = teamSelect.value; return teams.find(t=>t.id===idv); }
+
+      recordSale.addEventListener('click', ()=>{
+        const t = getSelectedTeam(); if(!t) return alert('Select a team');
+        const s = parseInt(saleSize.value,10); if(isNaN(s)||s<=0) return alert('Enter sale size');
+        t.sales.push({size:s,time:Date.now()});
+        if(s >= t.requiredSims){ t.abilityCount += 1; log(`${t.name} recorded a qualifying sale ${s} → +1 ability`); } else { log(`${t.name} recorded sale ${s} (needs >= ${t.requiredSims})`); }
+        saleSize.value=''; renderTeams(); renderTeamSelect(); updateMatchInfo();
+      });
+
+      btnRemove.addEventListener('click', ()=>{
+        const t = getSelectedTeam(); if(!t) return alert('Select team'); if(t.abilityCount<=0) return alert(`${t.name} has no abilities`); const unrevealed = tileState.map((x,i)=>x.revealed?null:i).filter(x=>x!==null); if(!unrevealed.length) return alert('No tiles left'); const sel = unrevealed[Math.floor(Math.random()*unrevealed.length)]; revealTile(sel, t, true);
+      });
+
+      btnReveal.addEventListener('click', ()=>{ const unrevealed = tileState.map((x,i)=>x.revealed?null:i).filter(x=>x!==null); if(!unrevealed.length) return; revealTile(unrevealed[Math.floor(Math.random()*unrevealed.length)], null, false); });
+
+      btnReset.addEventListener('click', ()=>{ buildTiles(); teams.forEach(t=>t.lastRemoved=false); renderTeams(); renderTeamSelect(); });
+
+      function revealTile(i, teamObj, consumed){
+        tileState[i].revealed = true;
+        const el = tilesEl.querySelector(`.tile[data-index="${i}"]`);
+        if(el){ el.classList.add('revealed'); el.innerHTML = `<div style="text-align:center"><div style="font-size:13px;color:var(--muted)">Revealed</div><div style="font-weight:900;margin-top:8px">${tileState[i].content}</div></div>`; }
+        if(consumed){ teamObj.abilityCount = Math.max(0, teamObj.abilityCount-1); teamObj.lastRemoved = true; log(`${teamObj.name} removed a tile (ability consumed)`); renderTeams(); renderTeamSelect(); smallBurst(28); updateMatchInfo(); }
+        else { log('A tile was revealed (random).'); smallBurst(12); updateMatchInfo(); }
+      }
+
+      submitGuess.addEventListener('click', ()=>{
+        const t = getSelectedTeam(); if(!t) return alert('Select a team'); if(!t.lastRemoved) return alert('Team must remove a tile first'); const guess = guessInput.value.trim(); if(!guess) return alert('Enter a guess'); let answer = (puzzleAnswer.value || '').trim(); if(!answer) answer = 'MAGENTA';
+        if(guess.toLowerCase() === answer.toLowerCase()){
+          log(`${t.name} guessed correctly!`); t.isCaptain = true; renderTeams(); renderTeamSelect(); bigBurst(); tileState.forEach((tile,i)=>{ if(!tile.revealed) revealTile(i,null,false); }); alert(`${t.name} guessed correctly — they win!`);
+        } else {
+          t.requiredSims = t.requiredSims * 2; t.lastRemoved = false; log(`${t.name} guessed wrong. Required doubled to ${t.requiredSims}`); renderTeams(); renderTeamSelect(); updateMatchInfo(); alert(`Wrong guess. ${t.name}'s requirement doubled to ${t.requiredSims}.`);
+        }
+        guessInput.value='';
+      });
+
+      function updateMatchInfo(){ const left = tileState.filter(t=>!t.revealed).length; matchInfo.textContent = `Teams: ${teams.length} • Tiles left: ${left}`; }
+
+      /* --- init --- */
+      function init(){
+        if(!namesEl.value.trim()) namesEl.value = 'Alex\\nBailey\\nCam\\nDiego\\nEvelyn\\nFrank';
+        renderTeams(); renderTeamSelect(); renderManualList(); buildTiles(); updateMatchInfo();
+      }
+      init();
+
+      // expose small big bursts for other flows
+      window.smallBurst = smallBurst; window.bigBurst = bigBurst;
+    })();
+  </script>
 </body>
 </html>
