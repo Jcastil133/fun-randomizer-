@@ -15,80 +15,94 @@
     <p class="subtitle">T-Mobile themed — teams, randomizer, and the Gallardian Match Game</p>
   </header>
 
-  <main class="container">
-    <section class="controls card">
-      <label for="names">Enter names (one per line):</label>
-      <textarea id="names" placeholder="Alice\nBob\nCharlie\n..." rows="6"></textarea>
+  <nav class="tabs">
+    <button class="tab-btn active" data-target="pane-randomizer">Randomizer</button>
+    <button class="tab-btn" data-target="pane-matchgame">Match Game</button>
+  </nav>
 
-      <div class="row">
-        <div>
-          <label for="teamsCount">Number of teams</label>
-          <input id="teamsCount" type="number" min="2" max="12" value="4" />
+  <main class="main-wrap">
+    <!-- Randomizer Pane -->
+    <section id="pane-randomizer" class="pane active card large">
+      <div class="pane-columns">
+        <div class="left">
+          <label for="names">Enter names (one per line):</label>
+          <textarea id="names" placeholder="Alice\nBob\nCharlie\n..." rows="10"></textarea>
+
+          <div class="row">
+            <div>
+              <label for="teamsCount">Number of teams</label>
+              <input id="teamsCount" type="number" min="2" max="12" value="4" />
+            </div>
+            <div>
+              <label for="teamSize">Team size</label>
+              <input id="teamSize" type="number" min="1" max="12" value="2" />
+            </div>
+          </div>
+
+          <div class="row buttons">
+            <button id="shuffleBtn" class="btn primary">Create Teams</button>
+            <button id="clearBtn" class="btn">Clear</button>
+            <button id="randomNameBtn" class="btn alt">Add Demo Names</button>
+          </div>
+
+          <label class="hint"><input id="allowUneven" type="checkbox" checked /> Allow uneven teams (distribute leftover)</label>
+
+          <hr style="margin:16px 0"/>
+
+          <h3>Manual teams</h3>
+          <div class="row">
+            <input id="manualTeamName" placeholder="Team name (eg. Team A)" />
+            <button id="addManualTeam" class="btn">Add Team</button>
+          </div>
+          <div id="manualTeamsList" class="muted small-text"></div>
         </div>
-        <div>
-          <label for="teamSize">Team size</label>
-          <input id="teamSize" type="number" min="1" max="12" value="2" />
+
+        <div class="right">
+          <div id="results" class="results"></div>
         </div>
       </div>
-
-      <div class="row buttons">
-        <button id="shuffleBtn" class="btn primary">Create Teams</button>
-        <button id="clearBtn" class="btn">Clear</button>
-        <button id="randomNameBtn" class="btn alt">Add Demo Names</button>
-      </div>
-
-      <label class="hint"><input id="allowUneven" type="checkbox" checked /> Allow uneven teams (distribute leftover)</label>
-
-      <hr style="margin:12px 0"/>
-
-      <h3 style="margin:6px 0 8px">Or create teams manually</h3>
-      <div class="row">
-        <input id="manualTeamName" placeholder="Team name (eg. Team A)" />
-        <button id="addManualTeam" class="btn">Add Team</button>
-      </div>
-      <div id="manualTeamsList" style="margin-top:12px;color:var(--muted);font-size:13px"></div>
     </section>
 
-    <section id="results" class="results card"></section>
+    <!-- Match Game Pane -->
+    <section id="pane-matchgame" class="pane card large">
+      <div class="match-grid">
+        <div class="match-left">
+          <h2>Match Game</h2>
+          <p class="muted">Sales grant tile removals. Single sale ≥ required sims (default 10) grants one removal. Wrong guesses double required sims.</p>
 
-    <section class="card small" id="matchGameCard">
-      <h2>Match Game</h2>
-      <p class="muted">Use sales to earn tile removals. Follow rules: single sale ≥ required sims (default 10) allows one tile removal. Guessing incorrectly doubles your team's required sims.</p>
-
-      <div class="row" style="margin-top:8px">
-        <label style="flex:1">
-          Active puzzle answer (for testing)
+          <label>Active puzzle answer (for testing)</label>
           <input id="puzzleAnswer" placeholder="SECRET WORD" />
-        </label>
+
+          <label style="margin-top:12px">Select team</label>
+          <select id="teamSelect"></select>
+
+          <div class="row" style="margin-top:10px">
+            <label style="flex:1">
+              Record a sale (single-sale size)
+              <input id="saleSize" type="number" placeholder="e.g., 10" />
+            </label>
+            <button id="recordSale" class="btn">Record Sale</button>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button id="removeTileBtn" class="btn primary">Remove Tile (consume ability)</button>
+            <button id="revealRandom" class="btn">Reveal Random Tile</button>
+            <button id="resetTiles" class="btn">Reset Tiles</button>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <input id="guessInput" placeholder="Enter puzzle guess (must remove a tile first)" />
+            <button id="submitGuess" class="btn">Guess</button>
+          </div>
+
+          <div id="gameLog" class="muted small-text" style="margin-top:12px;max-height:160px;overflow:auto;border-radius:8px;padding:8px;background:#fff"></div>
+        </div>
+
+        <div class="match-right">
+          <div id="tiles" class="tiles-large"></div>
+          <div id="matchInfo" style="margin-top:12px;color:var(--muted);font-size:14px"></div>
+        </div>
       </div>
-
-      <div style="margin-top:12px">
-        <label>Teams (select a team to take actions):</label>
-        <select id="teamSelect" style="width:100%;padding:8px;border-radius:6px;margin-top:6px"></select>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <label style="flex:1">
-          Record a sale for selected team (enter size of single sale)
-          <input id="saleSize" type="number" placeholder="e.g., 10" />
-        </label>
-        <button id="recordSale" class="btn">Record Sale</button>
-      </div>
-
-      <div style="margin-top:10px" class="row">
-        <button id="removeTileBtn" class="btn primary" title="Remove a tile if team has a qualifying single sale">Remove Tile (consume ability)</button>
-        <button id="revealRandom" class="btn">Reveal Random Tile</button>
-        <button id="resetTiles" class="btn">Reset Tiles</button>
-      </div>
-
-      <div id="tiles" class="tiles" style="margin-top:12px"></div>
-
-      <div style="margin-top:12px" class="row">
-        <input id="guessInput" placeholder="Enter puzzle guess (must remove a tile first)" />
-        <button id="submitGuess" class="btn">Guess</button>
-      </div>
-
-      <div id="gameLog" style="margin-top:12px;color:var(--muted);font-size:13px"></div>
     </section>
   </main>
 
